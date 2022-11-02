@@ -16,12 +16,13 @@ class Bermudas():
         self.cantidad = cantidad
 
     def cut_gen(self):
-        return self.movimiento_geometrico_browniano()
+        for _ in range(self.cantidad):
+            s_3_star = max(self.K - self.gen_movimiento_geometrico_browniano(), 0)
 
     def movimiento_browniano(self):
         return random.normal(self.media * self.tiempo, self.sigma * sqrt(self.tiempo), self.cantidad)
 
-    def movimiento_geometrico_browniano(self):
+    def gen_movimiento_geometrico_browniano(self):
         return self.s0 * exp(self.tendencia * self.tiempo + self.volatilidad * self.movimiento_browniano())
 
 """
