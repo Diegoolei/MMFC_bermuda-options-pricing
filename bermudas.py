@@ -16,13 +16,19 @@ class Bermudas():
         self.trayectorias = cantidad_trayectorias
 
     def gen_star(self):
+        """ Para cada columna de la tabla, se obtiene el valor de cortes que maximiza el payoff
+        Corregir: no es asi, aprender a valuar una opcion americana
+        """
         s_1, s_2, s_3 = self.gen_table()
-        s_1_s = s_1[random.uniform(0, self.trayectorias)]
-        s_2_s = s_2[random.uniform(0, self.trayectorias)]
-        s_3_s = s_3[random.uniform(0, self.trayectorias)]
+        s_1_s = self.get_promedio_payoff(s_1)
+        s_2_s = self.get_promedio_payoff(s_2)
+        s_3_s = self.K
         return s_1_s, s_2_s, s_3_s
 
     def gen_table(self):
+        """
+        Genera una tabla 3xN con los valores de las trayectorias
+        """
         s_1 = [self.gen_movimiento_geometrico_browniano(1/3, self.s0) for _ in range(self.trayectorias)]
         s_2 = [self.gen_movimiento_geometrico_browniano(2/3, s_1) for _ in range(self.trayectorias)]
         s_3 = [self.gen_movimiento_geometrico_browniano(1, s_2) for _ in range(self.trayectorias)]
@@ -34,9 +40,16 @@ class Bermudas():
     def movimiento_browniano(self, tiempo):
         return random.normal(0, sqrt(tiempo/self.trayectorias))
 
-    def gen_payoff(self):
-        s_1, s_2, s_3 = self.gen_table()
-        return [max(self.K - max(s_1, s_2, s_3), 0) for _ in range(self.trayectorias)]
+    def gen_payoff(self, s_i_j):
+        return max(self.K - s_i_j, 0)
+
+    def get_promedio_payoff(self, s_i):
+        return sum(self.gen_payoff(s_i[j]) for j in range(self.trayectorias)) / self.trayectorias
+
+    def valuate_bermuda_option(self):
+        """Autocompletado"""
+        s_1_s, s_2_s, s_3_s = self.gen_star()
+        return max((s_1_s + s_2_s + s_3_s)/3, self.gen_payoff(s_1_s) * exp(-self.r * 1))
 
 """
 Considerar: S0=36, r=0.06, σ=0.2, T= 1 año, K=35
