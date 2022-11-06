@@ -26,14 +26,15 @@ class Bermudas():
         """
         Para cada columna de la tabla, se obtiene el valor de cortes
         que maximiza el payoff
-        Corregir: no es asi, aprender a valuar una opcion americana
+        Corregir: s_1_s no se hace con los valores correctos
         """
-        # s_1, s_2, s_3 = self.gen_table()
-        self.gen_dataframe(TEST_TABLE[0], TEST_TABLE[1], TEST_TABLE[2], TEST_TABLE[3])
+        # table = self.gen_table()
+        table = TEST_TABLE
         self.K = 1.1
+        self.gen_dataframe(table[0], table[1], table[2], table[3])
         s_3_s = self.K
-        s_2_s = self.gen_star(TEST_TABLE[2], TEST_TABLE[3])
-        s_1_s = self.gen_star(TEST_TABLE[1], TEST_TABLE[2])
+        s_2_s = self.gen_star(table[2], table[3])
+        s_1_s = self.gen_star(table[1], table[2])
         print(self.dataframe)
         print(s_1_s, s_2_s, s_3_s)
         return s_1_s, s_2_s, s_3_s
@@ -43,10 +44,11 @@ class Bermudas():
         Genera una tabla 3xN con los valores de las trayectorias
         """
         motion_ammount = range(self.trayectorias)
+        s_0 = [self.s0 for _ in motion_ammount]
         s_1 = [self.geo_brownian_motion(1/3, self.s0) for _ in motion_ammount]
         s_2 = [self.geo_brownian_motion(2/3, s_1[i]) for i in motion_ammount]
         s_3 = [self.geo_brownian_motion(1, s_2[i]) for i in motion_ammount]
-        return s_1, s_2, s_3
+        return [s_0, s_1, s_2, s_3]
 
     def gen_dataframe(self, s_0, s_1, s_2, s_3):
         df = pd.DataFrame()
@@ -89,7 +91,7 @@ class Bermudas():
         """Autocompletado"""
         s_1_s, s_2_s, s_3_s = self.main()
         promedio = (s_1_s + s_2_s + s_3_s) / 3
-        ajuste = self.gen_payoff(s_1_s) * np.exp(-self.r * 1)
+        ajuste = self.deduct_period(self.gen_payoff(s_1_s))
         return max(promedio, ajuste)
 
 
@@ -97,4 +99,4 @@ class Bermudas():
 Considerar: S0=36, r=0.06, σ=0.2, T= 1 año, K=35
 """
 bermudas = Bermudas(36, 0.06, 0.2, 35, 8)
-bermudas.main()
+bermudas.valuate_bermuda_option()
