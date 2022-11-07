@@ -33,9 +33,9 @@ class Bermudas():
         self.gen_dataframe(table[0], table[1], table[2], table[3])
         s_3_s = self.K
         s_2_s = self.gen_star(table[2], table[3])
-        print(f"----------{self.get_cut_possible_values(s_2_s, table[2], table[3])}----------")
-        s_1_s = self.gen_star(table[1], self.get_cut_possible_values(s_2_s, table[2], table[3]))
+        print(f"V(3): {self.get_cut_possible_values(s_2_s, table[2], table[3])}----------")
         print(self.dataframe)
+        s_1_s = self.gen_star(table[1], self.get_cut_possible_values(s_2_s, table[2], table[3]))
         print(s_1_s, s_2_s, s_3_s)
         return s_1_s, s_2_s, s_3_s
 
@@ -68,11 +68,13 @@ class Bermudas():
         return np.random.normal(0, np.sqrt(tiempo/self.trayectorias))
 
     def gen_star(self, columna, siguiente_columna) -> float:
+        """ Obtiene el valor de corte que maximiza el payoff """
         a = [self.get_maximizer(columna[i], columna, siguiente_columna) for i in range(self.trayectorias)]
         print(f"---{a}---")
         return columna[a.index(max(a))]
 
     def get_maximizer(self, elem_columna, columna, siguiente_columna):
+        """ Obtiene el promedio de los payoffs para cada posible corte""" 
         posible_corte = []
         for i in range(self.trayectorias):
             if columna[i] <= elem_columna:
@@ -84,6 +86,7 @@ class Bermudas():
         return np.round(sum(posible_corte) / self.trayectorias, 4)
 
     def get_cut_possible_values(self, elem_columna, columna, siguiente_columna):
+        """ Obtiene la lista de los payoffs para cada posible corte""" 
         posible_corte = []
         for i in range(self.trayectorias):
             if columna[i] <= elem_columna:
