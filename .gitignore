@@ -1,1 +1,4 @@
 .vscode/settings.json
+node_modules/.bin/extract-zip
+node_modules/.bin/rimraf
+informe_tmp.html

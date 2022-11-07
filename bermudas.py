@@ -10,8 +10,7 @@ TEST_TABLE = [[1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00],
               [1.08, 1.26, 1.07, 0.97, 1.56, 0.77, 0.84, 1.22],
               [1.34, 1.54, 1.03, 0.92, 1.52, 0.90, 1.01, 1.34], ]
 
-table = [0.0, 0.0, 0.659, 0.1695, 0.0, 0.34, 0.26, 0.0]
-
+column = [0.0, 0.0, 0.659, 0.1695, 0.0, 0.34, 0.26, 0.0]
 
 class Bermudas():
     def __init__(self, s0, r, sigma, K, cantidad_trayectorias):
@@ -34,7 +33,8 @@ class Bermudas():
         self.gen_dataframe(table[0], table[1], table[2], table[3])
         s_3_s = self.K
         s_2_s = self.gen_star(table[2], table[3])
-        s_1_s = self.gen_star(table[1], table[2])
+        print(f"----------{self.get_cut_possible_values(s_2_s, table[2], table[3])}----------")
+        s_1_s = self.gen_star(table[1], self.get_cut_possible_values(s_2_s, table[2], table[3]))
         print(self.dataframe)
         print(s_1_s, s_2_s, s_3_s)
         return s_1_s, s_2_s, s_3_s
@@ -73,13 +73,20 @@ class Bermudas():
         return columna[a.index(max(a))]
 
     def get_maximizer(self, elem_columna, columna, siguiente_columna):
-        a = []
+        posible_corte = self.get_cut_possible_values(columna, elem_columna, siguiente_columna)
+
+        return np.round(sum(posible_corte) / self.trayectorias, 4)
+
+    def get_cut_possible_values(self, columna, elem_columna, siguiente_columna):
+        posible_corte = []
         for i in range(self.trayectorias):
             if columna[i] <= elem_columna:
-                a.append((np.round(self.gen_payoff(columna[i]), 4)))
+                posible_corte.append(np.round(self.gen_payoff(columna[i]), 4))
             else:
-                a.append((np.round(self.deduct_period(self.gen_payoff(siguiente_columna[i])), 4)))
-        return np.round(sum(a) / self.trayectorias, 4)
+                posible_corte.append(np.round(self.deduct_period(self.gen_payoff(siguiente_columna[i])), 4))
+
+        print(f"{elem_columna}:{posible_corte}")
+        return posible_corte
 
     def gen_payoff(self, s_i_j):
         return max(self.K - s_i_j, 0.0)
