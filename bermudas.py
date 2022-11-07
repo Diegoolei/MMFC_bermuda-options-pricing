@@ -33,8 +33,8 @@ class Bermudas():
         self.gen_dataframe(table[0], table[1], table[2], table[3])
         s_3_s = self.K
         s_2_s = self.gen_star(table[2], table[3])
-        print(f"----------{self.get_cut_possible_values(s_2_s, table[2], table[3])}----------")
-        s_1_s = self.gen_star(table[1], self.get_cut_possible_values(s_2_s, table[2], table[3]))
+        print(f"----------{self.get_cut_possible_values(table[2], s_2_s, table[3])}----------")
+        s_1_s = self.gen_star(table[1], self.get_cut_possible_values(table[2], s_2_s, table[3]))
         print(self.dataframe)
         print(s_1_s, s_2_s, s_3_s)
         return s_1_s, s_2_s, s_3_s
@@ -73,8 +73,14 @@ class Bermudas():
         return columna[a.index(max(a))]
 
     def get_maximizer(self, elem_columna, columna, siguiente_columna):
-        posible_corte = self.get_cut_possible_values(columna, elem_columna, siguiente_columna)
+        posible_corte = []
+        for i in range(self.trayectorias):
+            if columna[i] <= elem_columna:
+                posible_corte.append(np.round(self.gen_payoff(columna[i]), 4))
+            else:
+                posible_corte.append(np.round(self.deduct_period(self.gen_payoff(siguiente_columna[i])), 4))
 
+        print(f"{elem_columna}:{posible_corte}")
         return np.round(sum(posible_corte) / self.trayectorias, 4)
 
     def get_cut_possible_values(self, columna, elem_columna, siguiente_columna):
@@ -106,4 +112,4 @@ class Bermudas():
 Considerar: S0=36, r=0.06, σ=0.2, T= 1 año, K=35
 """
 bermudas = Bermudas(36, 0.06, 0.2, 35, 8)
-bermudas.valuate_bermuda_option()
+bermudas.main()
