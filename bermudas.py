@@ -33,8 +33,8 @@ class Bermudas():
         self.gen_dataframe(table[0], table[1], table[2], table[3])
         s_3_s = self.K
         s_2_s = self.gen_star(table[2], table[3])
-        print(f"----------{self.get_cut_possible_values(table[2], s_2_s, table[3])}----------")
-        s_1_s = self.gen_star(table[1], self.get_cut_possible_values(table[2], s_2_s, table[3]))
+        print(f"----------{self.get_cut_possible_values(s_2_s, table[2], table[3])}----------")
+        s_1_s = self.gen_star(table[1], self.get_cut_possible_values(s_2_s, table[2], table[3]))
         print(self.dataframe)
         print(s_1_s, s_2_s, s_3_s)
         return s_1_s, s_2_s, s_3_s
@@ -83,7 +83,7 @@ class Bermudas():
         print(f"{elem_columna}:{posible_corte}")
         return np.round(sum(posible_corte) / self.trayectorias, 4)
 
-    def get_cut_possible_values(self, columna, elem_columna, siguiente_columna):
+    def get_cut_possible_values(self, elem_columna, columna, siguiente_columna):
         posible_corte = []
         for i in range(self.trayectorias):
             if columna[i] <= elem_columna:
