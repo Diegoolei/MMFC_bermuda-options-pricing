@@ -32,7 +32,8 @@ class Bermudas():
         self.K = 1.1
         self.gen_dataframe(table[0], table[1], table[2], table[3])
         s_3_s = self.K
-        s_2_s = self.gen_star(table[2], table[3])
+        table_1 = [self.gen_payoff(elem) for elem in table[3]]
+        s_2_s = self.gen_star(table[2], table_1)
         print(f"V(3): {self.get_cut_possible_values(s_2_s, table[2], table[3])}----------")
         print(self.dataframe)
         s_1_s = self.gen_star(table[1], self.get_cut_possible_values(s_2_s, table[2], table[3]))
@@ -80,13 +81,13 @@ class Bermudas():
             if columna[i] <= elem_columna:
                 posible_corte.append(np.round(self.gen_payoff(columna[i]), 4))
             else:
-                posible_corte.append(np.round(self.deduct_period(self.gen_payoff(siguiente_columna[i])), 4))
+                posible_corte.append(np.round(self.deduct_period((siguiente_columna[i])), 4))
 
         print(f"{elem_columna}:{posible_corte}")
         return np.round(sum(posible_corte) / self.trayectorias, 4)
 
     def get_cut_possible_values(self, elem_columna, columna, siguiente_columna):
-        """ Obtiene la lista de los payoffs para cada posible corte""" 
+        """ Obtiene la lista de los payoffs para cada posible corte"""
         posible_corte = []
         for i in range(self.trayectorias):
             if columna[i] <= elem_columna:
