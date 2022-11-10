@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+
 """
 Desarrollar un algoritmo que genere los valores de corte,
 utilizando n trayectorias de un movimiento browniano geometrico,
@@ -8,9 +9,9 @@ para una opcion bermuda con madurez T, que puede ejercerse en t=T/3, 2T/3 o T
 TEST_TABLE = [[1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00],
               [1.09, 1.16, 1.22, 0.93, 1.11, 0.76, 0.92, 0.88],
               [1.08, 1.26, 1.07, 0.97, 1.56, 0.77, 0.84, 1.22],
-              [1.34, 1.54, 1.03, 0.92, 1.52, 0.90, 1.01, 1.34], ]
+              [1.34, 1.54, 1.03, 0.92, 1.52, 0.90, 1.01, 1.34]]
+K = 1.1
 
-column = [0.0, 0.0, 0.659, 0.1695, 0.0, 0.34, 0.26, 0.0]
 
 class Bermudas():
     def __init__(self, s0, r, sigma, K, cantidad_trayectorias):
@@ -21,24 +22,22 @@ class Bermudas():
         self.trayectorias = cantidad_trayectorias
         self.dataframe = []
 
-    def main(self):
+    def get_cut_values(self):
         """
         Para cada columna de la tabla, se obtiene el valor de cortes
         que maximiza el payoff
-        Corregir: s_1_s no se hace con los valores correctos
         """
-        # table = self.gen_table()
-        table = TEST_TABLE
-        self.K = 1.1
+        table = self.gen_table()
         self.gen_dataframe(table[0], table[1], table[2], table[3])
-        s_3_s = self.K
-        table_1 = [self.gen_payoff(elem) for elem in table[3]]
-        s_2_s = self.gen_star(table[2], table_1)
-        print(f"V(3): {self.get_cut_possible_values(s_2_s, table[2], table[3])}----------")
+        payoff_column_3 = [self.gen_payoff(elem) for elem in table[3]]
+        s_2_s = self.gen_star(table[2], payoff_column_3)
+        s_2_s_payoff = self.get_cut_possible_values(s_2_s, table[2],
+                                                    payoff_column_3)
+        print(f"V(3): {s_2_s_payoff}")
+        s_1_s = self.gen_star(table[1], s_2_s_payoff)
+        print("--------------------------------------------------------------")
         print(self.dataframe)
-        s_1_s = self.gen_star(table[1], self.get_cut_possible_values(s_2_s, table[2], table[3]))
-        print(s_1_s, s_2_s, s_3_s)
-        return s_1_s, s_2_s, s_3_s
+        return s_1_s, s_2_s, self.K
 
     def gen_table(self):
         """
@@ -59,44 +58,41 @@ class Bermudas():
         df['t = 3'] = s_3
         self.dataframe = df
 
-    def geo_brownian_motion(self, tiempo, s0: float) -> float:
+    def geo_brownian_motion(self, tiempo, s0):
         sigma = self.sigma
         w_t = self.movimiento_browniano(tiempo)
         mean = (self.r - sigma**2/2) * tiempo/self.trayectorias
-        return s0 * np.exp(mean + sigma*w_t)
+        return np.round(s0 * np.exp(mean + sigma*w_t), 4)
 
     def movimiento_browniano(self, tiempo) -> float:
         return np.random.normal(0, np.sqrt(tiempo/self.trayectorias))
 
-    def gen_star(self, columna, siguiente_columna) -> float:
+    def gen_star(self, columna, payoff_column) -> float:
         """ Obtiene el valor de corte que maximiza el payoff """
-        a = [self.get_maximizer(columna[i], columna, siguiente_columna) for i in range(self.trayectorias)]
-        print(f"---{a}---")
-        return columna[a.index(max(a))]
+        possible_cuts = [self.get_cut_possible_values(columna[i], columna,
+                                                      payoff_column)
+                         for i in range(self.trayectorias)]
 
-    def get_maximizer(self, elem_columna, columna, siguiente_columna):
-        """ Obtiene el promedio de los payoffs para cada posible corte""" 
-        posible_corte = []
-        for i in range(self.trayectorias):
-            if columna[i] <= elem_columna:
-                posible_corte.append(np.round(self.gen_payoff(columna[i]), 4))
-            else:
-                posible_corte.append(np.round(self.deduct_period((siguiente_columna[i])), 4))
+        for possible_cut in possible_cuts:
+            print(f"""{ [np.round(elem, 4) for elem in possible_cut]}""")
 
-        print(f"{elem_columna}:{posible_corte}")
-        return np.round(sum(posible_corte) / self.trayectorias, 4)
+        average = [np.round(np.sum(elem) / self.trayectorias, 4)
+                   for elem in possible_cuts]
+        print(f"---{average}---")
 
-    def get_cut_possible_values(self, elem_columna, columna, siguiente_columna):
+        max_average_elem_index = average.index(np.max(average))
+        return columna[max_average_elem_index]
+
+    def get_cut_possible_values(self, elem_columna,
+                                columna, siguiente_columna):
         """ Obtiene la lista de los payoffs para cada posible corte"""
         posible_corte = []
         for i in range(self.trayectorias):
             if columna[i] <= elem_columna:
-                posible_corte.append(np.round(self.gen_payoff(columna[i]), 4))
+                posible_corte.append(self.gen_payoff(columna[i]))
             else:
-                posible_corte.append(np.round(self.deduct_period(self.gen_payoff(siguiente_columna[i])), 4))
-
-        print(f"{elem_columna}:{posible_corte}")
-        return posible_corte
+                posible_corte.append(self.deduct_period(siguiente_columna[i]))
+        return [np.round(elem, 4) for elem in posible_corte]
 
     def gen_payoff(self, s_i_j):
         return max(self.K - s_i_j, 0.0)
@@ -106,7 +102,7 @@ class Bermudas():
 
     def valuate_bermuda_option(self):
         """Autocompletado"""
-        s_1_s, s_2_s, s_3_s = self.main()
+        s_1_s, s_2_s, s_3_s = self.get_cut_values()
         promedio = (s_1_s + s_2_s + s_3_s) / 3
         ajuste = self.deduct_period(self.gen_payoff(s_1_s))
         return max(promedio, ajuste)
@@ -115,5 +111,8 @@ class Bermudas():
 """
 Considerar: S0=36, r=0.06, σ=0.2, T= 1 año, K=35
 """
-bermudas = Bermudas(36, 0.06, 0.2, 35, 8)
-bermudas.main()
+bermudas_n_8 = Bermudas(36, 0.06, 0.2, 35, 8)
+s_1_s, s_2_s, s_3_s = bermudas_n_8.get_cut_values()
+print(f"s*(1): {s_1_s},")
+print(f"s*(2): {s_2_s},")
+print(f"s*(3): {s_3_s}")
