@@ -18,7 +18,7 @@ En la práctica, las opciones bermudas son opciones americanas que solo pueden s
 En sí el algorítmo conlleva pocos pasos:
 
 1. Generar los valores del activo subyacente en cada momento de corte, a través de movimientos geométricos brownianos
-2. Generar las cotas inferiores conocidas como valores de barrera (enfoque de ejercicio mediante parametros de barrera) mediante los datos obtenidos en el paso anterior
+2. Generar las cotas inferiores conocidas como valores de barrera (ejercicio mediante parametros de barrera) a partir de los datos obtenidos en el paso anterior
 3. Descartar los valores del paso 1 y generar nuevos utilizando el mismo método, pero guardando las cotas inferiores obtenidas en el paso 2
 4. Con los nuevos valores y las cotas inferiores, valorar la opción bermuda.
 
