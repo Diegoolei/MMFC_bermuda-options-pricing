@@ -4,3 +4,4 @@ node_modules/.bin/rimraf
 informe_tmp.html
 .pre-commit-config.yaml
 .vscode/extensions.json
+.DS_Store

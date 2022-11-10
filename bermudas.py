@@ -94,18 +94,38 @@ class Bermudas():
                 posible_corte.append(self.deduct_period(siguiente_columna[i]))
         return [np.round(elem, 4) for elem in posible_corte]
 
+    def get_cut_possible_values_2(self, elem_columna,
+                                columna, siguiente_columna):
+        """ Obtiene la lista de los payoffs para cada posible corte"""
+        posible_corte = []
+        for i in range(self.trayectorias):
+            if columna[i] <= elem_columna:
+                posible_corte.append(self.gen_payoff(columna[i]))
+            else:
+                posible_corte.append(0)
+        return [np.round(elem, 4) for elem in posible_corte]
+
     def gen_payoff(self, s_i_j):
         return max(self.K - s_i_j, 0.0)
 
     def deduct_period(self, value):
         return value * np.exp(-self.r * 1)
 
-    def valuate_bermuda_option(self):
-        """Autocompletado"""
-        s_1_s, s_2_s, s_3_s = self.get_cut_values()
-        promedio = (s_1_s + s_2_s + s_3_s) / 3
-        ajuste = self.deduct_period(self.gen_payoff(s_1_s))
-        return max(promedio, ajuste)
+    def valuate_bermuda_option(self, s_1_s, s_2_s, s_3_s):
+        table = self.gen_table()
+        self.gen_dataframe(table[0], table[1], table[2], table[3])
+        print(self.dataframe)
+        payoff_column_3 = self.get_cut_possible_values_2(s_3_s, table[3], table[3])
+        print(payoff_column_3)
+        payoff_column_2 = self.get_cut_possible_values(s_2_s, table[2], payoff_column_3)
+        print(payoff_column_2)
+        payoff_column_1 = self.get_cut_possible_values(s_1_s, table[1], payoff_column_2)
+        print(payoff_column_1)
+        average = sum(payoff_column_1) / self.trayectorias
+        deducted_average = self.deduct_period(average)
+
+        early_exercise = max(self.K - self.s0, 0.0)
+        return max(early_exercise, deducted_average)
 
 
 """
@@ -116,3 +136,6 @@ s_1_s, s_2_s, s_3_s = bermudas_n_8.get_cut_values()
 print(f"s*(1): {s_1_s},")
 print(f"s*(2): {s_2_s},")
 print(f"s*(3): {s_3_s}")
+
+prima_n_8 = bermudas_n_8.valuate_bermuda_option(s_1_s, s_2_s, s_3_s)
+print(f"la prima de la opción bermuda es: {prima_n_8}")
