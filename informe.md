@@ -126,7 +126,7 @@ Finalmente, se obtiene el valor de la opción bermuda como el maximo entre el pr
 ```
 
 ## Resultados
-A continuación, se demostrará paso a paso el funcionamiento del programa mediante la ejecución de un ejemplo con la siguiente tabla de datos (tomada de las páginas 726 a 732 del documento Hull - Options, Futures and Other Derivatives 7th Edition):
+A continuación, se demostrará paso a paso el funcionamiento del programa mediante la ejecución de un ejemplo con la siguiente tabla de datos (tomada de las páginas 606 a 609 del documento Hull - Options, Futures and Other Derivatives 7th Edition):
 
 |   | t = 0 | t = 1 | t = 2 | t = 3 |
 | - | ----- | ----- | ----- | ----- |
@@ -142,7 +142,7 @@ A continuación, se demostrará paso a paso el funcionamiento del programa media
 Sabemos que s*(3)=1.1=K, por lo que partiremos calculando s*(2) y s*(1) para luego calcular el valor de la opción bermuda.
 Como es a modo de ejmplo, solo se calculará el valor de la opción bermuda para 3 de las trayectorias en la tabla por cada tiempo.
 
-Para s*(2) partiremos desde el valor de la posición 5 en s(2) 0.77 ya que es menor a todos los elementos de s(3).
+Para s*(2) partiremos desde el valor de la posición 5 en s(2) 0.77 ya que es menor a todos los elementos de s(2).
 Según el algoritmo, cuando el posible valor de corte es *menor* que el valor iterante de la columna actual, se debe tomar el payoff de la columna siguiente y descontarlo al tiempo correspondiente.
 Y cuando es `mayor o igual`, se debe tomar el payoff de la columna actual.
 
@@ -177,20 +177,21 @@ Para calcular s*(1) utilizaremos los payoff obtenidos para s*(2) = 0.84 como col
 
 payoff_column = [0.0, 0.0, 0.0659, 0.1695, 0.0, `0.33`, `0.26`, 0.0]
 
-[d(m(1.1 - 1.34, 0)), d(m(1.1 - 1.54, 0)), d(m(1.1 - 1.03, 0)), d(m(1.1 - 0.92, 0)), d(m(1.1 - 1.52, 0)), `max(1.1 - 0.77, 0)`, d(m(1.1 - 1.01, 0)), d(m(1.1 - 1.34, 0))]
+Partiremos desde el valor de la posición 5 en s(1) 0.76 ya que es menor a todos los elementos de s(1).
 
-[0.0, 0.0, 0.0659, 0.1695, 0.0, `0.33`, 0.0848, 0.0]
+[d(0), d(0), d(0.0659), d(0.1659), d(0), `max(1.1 - 0.76, 0)`, d(1.1 - 0.84, 0), d(0)]
 
-Cuyo promedio es 0.0848.
+[0.0, 0.0, 0.0621, 0.1596, 0.0, `0.34`, 0.2449, 0.0]
 
-Posición 3 en s(2) = 0.97
+Cuyo promedio es 0.1008.
 
-[d(m(1.1 - 1.34, 0)), d(m(1.1 - 1.54, 0)), d(m(1.1 - 1.03, 0)), `max(1.1 - 0.97, 0)`, d(m(1.1 - 1.52, 0)), `max(1.1 - 0.77, 0)`, `max(1.1 - 0.84, 0)`, d(m(1.1 - 1.34, 0))]
+Posición 3 en s(1) = 0.93
 
-[0.0, 0.0, 0.0659, `0.13`, 0.0, `0.33`, `0.26`, 0.0]
+[d(0), d(0), d(0.0659), `max(1.1 - 0.93, 0)`, d(0), `max(1.1 - 0.76, 0)`, `max(1.1 - 0.92, 0)`, `max(1.1 - 0.88, 0)`]
 
-Cuyo promedio es 0.0982
+[0.0, 0.0, 0.0621, `0.17`, 0.0, `0.34`, `0.18`, `0.22`]
 
+Cuyo promedio es 0.1215
 
 Posición 7 en s(1) = 0.88
 
@@ -199,6 +200,8 @@ Posición 7 en s(1) = 0.88
 [0.0, 0.0, 0.0621, 0.1596, 0.0, 0.34, 0.2449, 0.22]
 
 Cuyo promedio es 0.1283, que es el mayor de los promedios obtenidos para s(2), por lo que s*(1) = 0.88
+
+Finalmente 0.1283 descontado un período es 0.1208, lo cuál será el valor de la opción bermuda.
 
 Como veremos mas adelante, este resultado es simulado con éxito por el programa y se obtiene el mismo valor de la prima de la opción bermuda.
 
@@ -211,6 +214,12 @@ Siendo N y M cantidades de elementos de la tabla de datos generados para la obte
 
 
 ## Conclusiones
+
+El programa desarrollado en Python es capaz de calcular el valor de la opción bermuda, para cualquier valor de K, T, r, sigma, S0, N y M.
+
+Eso demuestra que, con esos simples datos, es posible obtener el valor de la opción bermuda, y que el método de Black-Scholes es capaz de calcular el valor de la opción bermuda.
+
+Se puede concluir que las opciones Bermuda si bien no tienen una formula cerrada para el calculo de su prima, el mismo puede ser estimado y simulado con el método de Black-Scholes.
 
 ## link al repositorio
 

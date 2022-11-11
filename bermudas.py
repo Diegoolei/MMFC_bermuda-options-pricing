@@ -27,8 +27,8 @@ class Bermudas():
         que maximiza el payoff
         """
         table = self.gen_table(self.trayectorias)
-        table = TEST_TABLE
-        self.K = 1.1
+        # table = TEST_TABLE
+        # self.K = 1.1
         self.gen_dataframe(table[0], table[1], table[2], table[3])
 
         payoff_column_3 = [self.gen_payoff(elem) for elem in table[3]]
@@ -36,10 +36,10 @@ class Bermudas():
 
         s_2_s_payoff = self.get_cut_possible_values(s_2_s, table[2],
                                                     payoff_column_3)
-        print(f"V(3): {s_2_s_payoff}")
+        # print(f"V(3): {s_2_s_payoff}")
         s_1_s = self.gen_barrier(table[1], s_2_s_payoff)
-        print("--------------------------------------------------------------")
-        print(self.dataframe)
+        # print("--------------------------------------------------------------")
+        # print(self.dataframe)
         return s_1_s, s_2_s, self.K
 
     def gen_table(self, n):
@@ -77,12 +77,12 @@ class Bermudas():
                                                       payoff_column)
                          for i in range(self.trayectorias)]
 
-        for possible_cut in possible_cuts:
-            print(f"""{ [np.round(elem, 4) for elem in possible_cut]}""")
+        # for possible_cut in possible_cuts:
+        # print(f"""{ [np.round(elem, 4) for elem in possible_cut]}""")
 
         average = [np.round(np.sum(elem) / self.trayectorias, 4)
                    for elem in possible_cuts]
-        print(f"---{average}---")
+        # print(f"---{average}---")
 
         max_average_elem_index = average.index(np.max(average))
         return actual_column[max_average_elem_index]
@@ -106,18 +106,18 @@ class Bermudas():
 
     def valuate_bermuda_option(self, s_1_s, s_2_s, s_3_s, n):
         table = self.gen_table(n)
-        table = TEST_TABLE
+        # table = TEST_TABLE
         self.gen_dataframe(table[0], table[1], table[2], table[3])
-        print(self.dataframe)
+        # print(self.dataframe)
         v_3 = [self.gen_payoff(elem) for elem in table[3]]
         payoff_column_3 = self.get_cut_possible_values(s_3_s, table[3], v_3)
-        print(payoff_column_3)
+        # print(payoff_column_3)
         payoff_column_2 = self.get_cut_possible_values(s_2_s, table[2],
                                                        payoff_column_3)
-        print(payoff_column_2)
+        # print(payoff_column_2)
         payoff_column_1 = self.get_cut_possible_values(s_1_s, table[1],
                                                        payoff_column_2)
-        print(payoff_column_1)
+        # print(payoff_column_1)
         average = sum(payoff_column_1) / self.trayectorias
         deducted_average = self.deduct_period(average)
 
@@ -134,19 +134,19 @@ print(f"s*(1): {s_1_s},")
 print(f"s*(2): {s_2_s},")
 print(f"s*(3): {s_3_s}")
 
-prima_n_8 = bermudas_n_8.valuate_bermuda_option(s_1_s, s_2_s, s_3_s, 0)
+prima_n_8 = bermudas_n_8.valuate_bermuda_option(s_1_s, s_2_s, s_3_s, 8)
 print(f"la prima de la opción bermuda es: {prima_n_8:.4f}")
 
-# prima_n_8 = bermudas_n_8.valuate_bermuda_option(s_1_s, s_2_s, s_3_s, 8)
-# print(f"la prima de la opción bermuda es: {prima_n_8:.4f}")
+prima_n_8 = bermudas_n_8.valuate_bermuda_option(s_1_s, s_2_s, s_3_s, 8)
+print(f"la prima de la opción bermuda es: {prima_n_8:.4f}")
 
-# bermudas_n_1000 = Bermudas(35, 0.06, 0.2, 35, 1000)
-# s_1_s, s_2_s, s_3_s = bermudas_n_1000.gen_barriers()
+bermudas_n_1000 = Bermudas(35, 0.06, 0.2, 35, 1000)
+s_1_s, s_2_s, s_3_s = bermudas_n_1000.gen_barriers()
 
-# prima_n_20000 = bermudas_n_1000.valuate_bermuda_option(s_1_s, s_2_s,
-#                                                        s_3_s, 20000)
-# print(f"la prima de la opción bermuda es: {prima_n_20000:.4f}")
+prima_n_20000 = bermudas_n_1000.valuate_bermuda_option(s_1_s, s_2_s,
+                                                       s_3_s, 20000)
+print(f"la prima de la opción bermuda es: {prima_n_20000:.4f}")
 
-# prima_n_20000 = bermudas_n_1000.valuate_bermuda_option(s_1_s, s_2_s,
-#                                                        s_3_s, 20000)
-# print(f"la prima de la opción bermuda es: {prima_n_20000:.4f}")
+prima_n_20000 = bermudas_n_1000.valuate_bermuda_option(s_1_s, s_2_s,
+                                                       s_3_s, 20000)
+print(f"la prima de la opción bermuda es: {prima_n_20000:.4f}")
