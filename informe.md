@@ -99,17 +99,25 @@ La valoración de la opción bermuda se realiza mediante el método `valuate_ber
 * `n`: cantidad de pasos de tiempo a simular
 
 El método `valuate_bermuda_option` utiliza las cotas inferiores obtenidas anteriormente y nuevos valores generados para el activo subyacente para obtener la prima para la opción bermuda.
-Para ello, genera una nueva tabla de valores utilizando `gen_table` y con ellos 
-
+Para ello, pasa como argumentos la cota inferior `s_3_s`, la tercer columna de la tabla de datos generados (correspondiente al `t=3`) `table[3]` y `v_3` siendo los payoff correspondientes a `table[3]` a la función `get_cut_possible_values`.
+El resultado de esa función se guarda temporalmente en la variable `payoff_column_3`
 ```python
     table = self.gen_table(n)
 
     v_3 = [self.gen_payoff(elem) for elem in table[3]]
     payoff_column_3 = self.get_cut_possible_values(s_3_s, table[3], v_3)
+```
+`payoff_column_3` es utilizado como argumento para la función `get_cut_possible_values` en lugar de una variable `v_2` (ya que los payoff ya están calculados en esa variable y fueron descontados al tiempo correspondiente de ser necesario), junto con la cota inferior `s_2_s`, la segunda columna de la tabla de datos generados (correspondiente al `t=2`) `table[2]` quedando guardado en la variable `payoff_column_2`.
+Este proceso se repite para el momento `t=1` quedando guardado en la variable `payoff_column_1`.
+
+```python
     payoff_column_2 = self.get_cut_possible_values(s_2_s, table[2],
                                                     payoff_column_3)
     payoff_column_1 = self.get_cut_possible_values(s_1_s, table[1],
                                                     payoff_column_2)
+```
+Finalmente, se obtiene el valor de la opción bermuda como el maximo entre el promedio de los valores de `payoff_column_1` deducido un tiempo y el ejercicio temprano de la acción.
+```python
     average = sum(payoff_column_1) / self.trayectorias
     deducted_average = self.deduct_period(average)
 
@@ -118,12 +126,89 @@ Para ello, genera una nueva tabla de valores utilizando `gen_table` y con ellos
 ```
 
 ## Resultados
+A continuación, se demostrará paso a paso el funcionamiento del programa mediante la ejecución de un ejemplo con la siguiente tabla de datos (tomada de las páginas 726 a 732 del documento Hull - Options, Futures and Other Derivatives 7th Edition):
 
-Los resultados obtenidos se muestran en la siguiente tabla:
+|   | t = 0 | t = 1 | t = 2 | t = 3 |
+| - | ----- | ----- | ----- | ----- |
+| 0 |  1.0  |  1.09 |  1.08 |  1.34 |
+| 1 |  1.0  |  1.16 |  1.26 |  1.54 |
+| 2 |  1.0  |  1.22 |  1.07 |  1.03 |
+| 3 |  1.0  |  0.93 |  0.97 |  0.92 |
+| 4 |  1.0  |  1.11 |  1.56 |  1.52 |
+| 5 |  1.0  |  0.76 |  0.77 |  0.90 |
+| 6 |  1.0  |  0.92 |  0.84 |  1.01 |
+| 7 |  1.0  |  0.88 |  1.22 |  1.34 |
 
-| N  | M    | Valor de la opción bermuda |
-| -- | ---- | --------------------------- |
-| 10 | 1000 |                             |
+Sabemos que s*(3)=1.1=K, por lo que partiremos calculando s*(2) y s*(1) para luego calcular el valor de la opción bermuda.
+Como es a modo de ejmplo, solo se calculará el valor de la opción bermuda para 3 de las trayectorias en la tabla por cada tiempo.
+
+Para s*(2) partiremos desde el valor de la posición 5 en s(2) 0.77 ya que es menor a todos los elementos de s(3).
+Según el algoritmo, cuando el posible valor de corte es *menor* que el valor iterante de la columna actual, se debe tomar el payoff de la columna siguiente y descontarlo al tiempo correspondiente.
+Y cuando es `mayor o igual`, se debe tomar el payoff de la columna actual.
+
+d(m(k-s(t)_i, 0)) = discount(max(k-s(t)_i, 0))
+
+[d(m(1.1 - 1.34, 0)), d(m(1.1 - 1.54, 0)), d(m(1.1 - 1.03, 0)), d(m(1.1 - 0.92, 0)), d(m(1.1 - 1.52, 0)), `max(1.1 - 0.77, 0)`, d(m(1.1 - 1.01, 0)), d(m(1.1 - 1.34, 0))]
+
+[0.0, 0.0, 0.0659, 0.1695, 0.0, `0.33`, 0.0848, 0.0]
+
+Cuyo promedio es 0.0848.
+
+Posición 3 en s(2) = 0.97
+
+[d(m(1.1 - 1.34, 0)), d(m(1.1 - 1.54, 0)), d(m(1.1 - 1.03, 0)), `max(1.1 - 0.97, 0)`, d(m(1.1 - 1.52, 0)), `max(1.1 - 0.77, 0)`, `max(1.1 - 0.84, 0)`, d(m(1.1 - 1.34, 0))]
+
+[0.0, 0.0, 0.0659, `0.13`, 0.0, `0.33`, `0.26`, 0.0]
+
+Cuyo promedio es 0.0982
+
+
+Posición 6 en s(2) = 0.84
+
+[d(m(1.1 - 1.34, 0)), d(m(1.1 - 1.54, 0)), d(m(1.1 - 1.03, 0)), d(m(1.1 - 0.92, 0)), d(m(1.1 - 1.52, 0)), `max(1.1 - 0.77, 0)`, `max(1.1 - 0.84, 0)`, d(m(1.1 - 1.34, 0))]
+
+[0.0, 0.0, 0.0659, 0.1695, 0.0, `0.33`, `0.26`, 0.0]
+
+Cuyo promedio es 0.1032, que es el mayor de los promedios obtenidos para s(2), por lo que s*(2) = 0.84
+
+---
+
+Para calcular s*(1) utilizaremos los payoff obtenidos para s*(2) = 0.84 como columna de payoff, ya que es el mayor de los promedios obtenidos para s(2).
+
+payoff_column = [0.0, 0.0, 0.0659, 0.1695, 0.0, `0.33`, `0.26`, 0.0]
+
+[d(m(1.1 - 1.34, 0)), d(m(1.1 - 1.54, 0)), d(m(1.1 - 1.03, 0)), d(m(1.1 - 0.92, 0)), d(m(1.1 - 1.52, 0)), `max(1.1 - 0.77, 0)`, d(m(1.1 - 1.01, 0)), d(m(1.1 - 1.34, 0))]
+
+[0.0, 0.0, 0.0659, 0.1695, 0.0, `0.33`, 0.0848, 0.0]
+
+Cuyo promedio es 0.0848.
+
+Posición 3 en s(2) = 0.97
+
+[d(m(1.1 - 1.34, 0)), d(m(1.1 - 1.54, 0)), d(m(1.1 - 1.03, 0)), `max(1.1 - 0.97, 0)`, d(m(1.1 - 1.52, 0)), `max(1.1 - 0.77, 0)`, `max(1.1 - 0.84, 0)`, d(m(1.1 - 1.34, 0))]
+
+[0.0, 0.0, 0.0659, `0.13`, 0.0, `0.33`, `0.26`, 0.0]
+
+Cuyo promedio es 0.0982
+
+
+Posición 7 en s(1) = 0.88
+
+[d(0), d(0), d(0.0659), d(0.1659), d(0), `max(1.1 - 0.76, 0)`, d(1.1 - 0.84, 0), `max(1.1 - 0.88, 0)`]
+
+[0.0, 0.0, 0.0621, 0.1596, 0.0, 0.34, 0.2449, 0.22]
+
+Cuyo promedio es 0.1283, que es el mayor de los promedios obtenidos para s(2), por lo que s*(1) = 0.88
+
+Como veremos mas adelante, este resultado es simulado con éxito por el programa y se obtiene el mismo valor de la prima de la opción bermuda.
+
+Siendo N y M cantidades de elementos de la tabla de datos generados para la obtención de las cotas inferiores y para la prima de la opción respectivamente, se obtienen los siguientes resultados para la opción bermuda:
+
+|  N   |   M   |  Valor de la opción bermuda |
+| ---- | ----- | --------------------------- |
+| 0008 | 20000 |           0.1209            |
+| 1000 | 20000 |           0.0101            |
+
 
 ## Conclusiones
 

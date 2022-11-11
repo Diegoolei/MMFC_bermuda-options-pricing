@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-
 """
 Desarrollar un algoritmo que genere los valores de corte,
 utilizando n trayectorias de un movimiento browniano geometrico,
@@ -129,13 +128,13 @@ class Bermudas():
 """
 Considerar: S0=36, r=0.06, σ=0.2, T= 1 año, K=35
 """
-bermudas_n_8 = Bermudas(35, 0.06, 0.2, 35, 8)
+bermudas_n_8 = Bermudas(35.1, 0.06, 0.2, 35, 8)
 s_1_s, s_2_s, s_3_s = bermudas_n_8.gen_barriers()
 print(f"s*(1): {s_1_s},")
 print(f"s*(2): {s_2_s},")
 print(f"s*(3): {s_3_s}")
 
-prima_n_8 = bermudas_n_8.valuate_bermuda_option(s_1_s, s_2_s, s_3_s, 8)
+prima_n_8 = bermudas_n_8.valuate_bermuda_option(s_1_s, s_2_s, s_3_s, 0)
 print(f"la prima de la opción bermuda es: {prima_n_8:.4f}")
 
 # prima_n_8 = bermudas_n_8.valuate_bermuda_option(s_1_s, s_2_s, s_3_s, 8)
