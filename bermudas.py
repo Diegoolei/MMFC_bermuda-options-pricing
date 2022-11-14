@@ -48,9 +48,9 @@ class Bermudas():
         """
         motion_ammount = range(n)
         s_0 = [self.s0 for _ in motion_ammount]
-        s_1 = [self.geo_brownian_motion(1/3, self.s0) for _ in motion_ammount]
-        s_2 = [self.geo_brownian_motion(2/3, s_1[i]) for i in motion_ammount]
-        s_3 = [self.geo_brownian_motion(1, s_2[i]) for i in motion_ammount]
+        s_1 = [self.geo_brownian_motion(self.s0) for _ in motion_ammount]
+        s_2 = [self.geo_brownian_motion(s_1[i]) for i in motion_ammount]
+        s_3 = [self.geo_brownian_motion(s_2[i]) for i in motion_ammount]
         return [s_0, s_1, s_2, s_3]
 
     def gen_dataframe(self, s_0, s_1, s_2, s_3):
@@ -61,14 +61,14 @@ class Bermudas():
         df['t = 3'] = s_3
         self.dataframe = df
 
-    def geo_brownian_motion(self, delta_t, s0):
+    def geo_brownian_motion(self, s0):
         sigma = self.sigma
-        w_t = self.brownian_motion(delta_t)
-        mean = (self.r - sigma**2/2) * delta_t/self.trayectorias
+        w_t = self.brownian_motion()
+        mean = (self.r - sigma**2/2) / 3
         return np.round(s0 * np.exp(mean + sigma*w_t), 4)
 
-    def brownian_motion(self, delta_t) -> float:
-        return np.random.normal(0, np.sqrt(delta_t/self.trayectorias))
+    def brownian_motion(self) -> float:
+        return np.random.normal(0, np.sqrt(1/3))
 
     def gen_barrier(self, actual_column, payoff_column) -> float:
         """ Obtiene el valor de corte que maximiza el payoff """
@@ -102,7 +102,7 @@ class Bermudas():
         return max(self.K - s_i_j, 0.0)
 
     def deduct_period(self, value):
-        return value * np.exp(-self.r * 1)
+        return value * np.exp(-self.r * 1/3)
 
     def valuate_bermuda_option(self, s_1_s, s_2_s, s_3_s, n):
         table = self.gen_table(n)
