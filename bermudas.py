@@ -13,13 +13,14 @@ K = 1.1
 
 
 class Bermudas():
-    def __init__(self, s0, r, sigma, K, cantidad_trayectorias):
+    def __init__(self, s0, r, sigma, K, cantidad_trayectorias, delta_t):
         self.s0 = s0
         self.r = r
         self.sigma = sigma
         self.K = K
         self.trayectorias = cantidad_trayectorias
         self.dataframe = []
+        self.delta_t = delta_t
 
     def gen_barriers(self):
         """
@@ -64,11 +65,11 @@ class Bermudas():
     def geo_brownian_motion(self, s0):
         sigma = self.sigma
         w_t = self.brownian_motion()
-        mean = (self.r - sigma**2/2) / 3
+        mean = (self.r - sigma**2/2) * self.delta_t
         return np.round(s0 * np.exp(mean + sigma*w_t), 4)
 
     def brownian_motion(self) -> float:
-        return np.random.normal(0, np.sqrt(1/3))
+        return np.random.normal(0, np.sqrt(self.delta_t))
 
     def gen_barrier(self, actual_column, payoff_column) -> float:
         """ Obtiene el valor de corte que maximiza el payoff """
@@ -128,7 +129,7 @@ class Bermudas():
 """
 Considerar: S0=36, r=0.06, σ=0.2, T= 1 año, K=35
 """
-bermudas_n_8 = Bermudas(35.1, 0.06, 0.2, 35, 8)
+bermudas_n_8 = Bermudas(35.1, 0.06, 0.2, 35, 8, 1/3)
 s_1_s, s_2_s, s_3_s = bermudas_n_8.gen_barriers()
 print(f"s*(1): {s_1_s},")
 print(f"s*(2): {s_2_s},")
