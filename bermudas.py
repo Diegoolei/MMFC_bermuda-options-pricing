@@ -103,7 +103,7 @@ class Bermudas():
         return max(self.K - s_i_j, 0.0)
 
     def deduct_period(self, value):
-        return value * np.exp(-self.r * 1/3)
+        return value * np.exp(-self.r * self.delta_t)
 
     def valuate_bermuda_option(self, s_1_s, s_2_s, s_3_s, n):
         table = self.gen_table(n)
@@ -129,7 +129,7 @@ class Bermudas():
 """
 Considerar: S0=36, r=0.06, σ=0.2, T= 1 año, K=35
 """
-bermudas_n_8 = Bermudas(35.1, 0.06, 0.2, 35, 8, 1/3)
+bermudas_n_8 = Bermudas(36, 0.06, 0.2, 35, 8, 1/3)
 s_1_s, s_2_s, s_3_s = bermudas_n_8.gen_barriers()
 print(f"s*(1): {s_1_s},")
 print(f"s*(2): {s_2_s},")
@@ -141,7 +141,7 @@ print(f"la prima de la opción bermuda es: {prima_n_8:.4f}")
 prima_n_8 = bermudas_n_8.valuate_bermuda_option(s_1_s, s_2_s, s_3_s, 8)
 print(f"la prima de la opción bermuda es: {prima_n_8:.4f}")
 
-bermudas_n_1000 = Bermudas(35, 0.06, 0.2, 35, 1000)
+bermudas_n_1000 = Bermudas(36, 0.06, 0.2, 35, 1000, 1/3)
 s_1_s, s_2_s, s_3_s = bermudas_n_1000.gen_barriers()
 
 prima_n_20000 = bermudas_n_1000.valuate_bermuda_option(s_1_s, s_2_s,
